@@ -116,8 +116,13 @@ class Puzzle():
         ######## TASK 1.1 BEGIN ##########
         
         #Add code to determine whether this puzzle is solved
+        isSolved = True
+        for placeInd in range(0, len(self.state)):
+            if (placeInd != self.state[placeInd]):
+                isSolved = False
+                break
         
-        return False #Change this!
+        return isSolved #Change this!
 
         ######## TASK 1.1 END   ##########
 
@@ -159,15 +164,15 @@ class SearchNode():
 
         if self.options.type == 'g':
             #greedy search algorithm
-            self.f_value = 0 # Change this to implement greedy!
+            self.f_value = self.h # Change this to implement greedy!
 
         elif self.options.type == 'u':
             #uniform cost search algorithm
-            self.f_value = 0 # Change this to implement uniform cost search!
+            self.f_value = self.cost # Change this to implement uniform cost search!
 
         elif self.options.type == 'a':
             #A* search algorithm
-            self.f_value = 0 # Change this to implement A*!
+            self.f_value = self.cost + self.h # Change this to implement A*!
 
         else:
             print('Invalid search type (-t) selected: Valid options are g, u, and a')
@@ -228,8 +233,16 @@ def tiles_out_of_row_column(puzzle):
     ######## TASK 1.4.1 BEGIN   ##########
 
     # YOUR TASK 1.4.1 CODE HERE
-    
-    return 0 #change this
+    state = puzzle.state
+    h = 0
+    for tileInd in range(0, len(state)):
+        tile = state[tileInd]
+        if (get_tile_row(tile) != get_tile_row(tileInd)):
+            h += 1
+        if (get_tile_column(tile) != get_tile_column(tileInd)):
+            h += 1
+
+    return h #change this
     
     ######## TASK 1.4.1 END   ##########
 
@@ -242,8 +255,14 @@ def manhattan_distance_to_goal(puzzle):
     ######## TASK 1.4.2 BEGIN   #########
 
     # YOUR TASK 1.4.2 CODE HERE
+    state = puzzle.state
+    manDist = 0
+    for tileCur in range(0, len(state)):
+        tileWant = state[tileCur]
+        dist = abs(get_tile_column(tileWant) - get_tile_column(tileCur)) + abs(get_tile_row(tileWant) - get_tile_row(tileCur))
+        manDist += dist
     
-    return 0 #change this!
+    return manDist #change this!
     
     ######## TASK 1.4.2 END   ##########  
 
