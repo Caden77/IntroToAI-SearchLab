@@ -279,22 +279,22 @@ def get_tile_column(tile):
     """
     return tile % 3    
     
-def run_iterative_search(start_node):
+def run_iterative_search(pq, options):
     """
     This runs an iterative deepening search
     It caps the depth of the search at 40 (no 8-puzzles have solutions this long)
     """
     #Our initial depth limit
-    depth_limit = 1
+    f_limit = 1
     
     #Maximum depth limit
-    max_depth_limit = 40
+    max_f_limit = 40
     
     #Keep track of the total number of nodes we expand
     total_expanded = 0
     
-    #Keep trying until our depth limit hits 40
-    while depth_limit < max_depth_limit:
+    #Keep trying until our depth limit hits the maximum
+    while f_limit < max_f_limit:
         
         #Store visited nodes along the current search path
         visited = dict()
@@ -303,24 +303,88 @@ def run_iterative_search(start_node):
         #Mark the initial state as visited
         visited[start_node.puzzle.id()] = True
         
-        #Run depth-limited search starting at initial node (which points to initial state)
-        path_length = run_dfs(start_node, depth_limit, visited) 
-    
-        #See how many nodes we expanded on this iteration and add it to our total
-        total_expanded += visited['N']
+        #Run f-limited best first search starting at initial node (which points to initial state)
+        total_expanded, path_length = run_limited_bfs(pq, f_limit, options) 
         
         #Check to see if a solution was found
         if path_length is not None:
             #It was! Print out information and return the search stats
             print('Expanded ', total_expanded, 'nodes')
-            print('IDS Found solution at depth', depth_limit)
+            print('IDS Found solution at depth', f_limit)
             return total_expanded, path_length
             
         # No solution was found at this depth limit, so increment our depth-limit    
-        depth_limit += 1
+        f_limit += 1
         
     # No solution was found at any depth-limit, so return None,None (Which signifies no solution found)
     return None, None
+
+def run_limited_bfs(fringe, f_limit, options):
+    """
+    Runs an arbitrary best-first search.  To change which search is run, modify the f-value 
+    computation in the search nodes
+
+    fringe is a priority queue of search nodes, ordered by f-values
+    """
+    #Create our data structure to track visited/expanded states
+    visited = dict()
+    
+    #Variable to tell when we are done
+    done = False
+                
+    #Main search loop.  Keep going as long as we are not done and the FRINGE isn't empty
+    while not done and not fringe.empty():
+        
+        #Get the next SearchNode from the FRINGE
+        cur_node = fringe.get()
+        
+        #Add it to our set of visited/expanded states (join creates a string from the state)
+        visited[cur_node.puzzle.id()] = True
+        
+        #Don't continue if the cost is too much
+        if cur_node.cost > 200:
+            #None of the puzzles are this long, so we shouldn't continue further on this path
+            continue
+            
+        #Check to see if this node's puzzle state is a goal state
+        if cur_node.puzzle.is_solved():
+            #It is! We are done, print out details
+            done = True
+            print('Best-First SOLVED THE PUZZLE: SOLUTION = ', cur_node.path)
+            print('Expanded ', len(visited), 'states')
+            return len(visited), len(cur_node.path)
+            
+        else:
+            #Generate this SearchNode's successors and add them to the FRINGE
+            
+            #Get the possible moves (actions) for this state
+            moves = cur_node.puzzle.get_moves()
+            
+            #For each move, do the move, create SearchNode from successor, then add to FRINGE
+            for m in moves:
+                #Create new puzzle that new node will point to
+                np = Puzzle(cur_node.puzzle.state)
+                
+                #Execute the move/action
+                np.do_move(m)
+                
+                #Add to the FRINGE, as long as we haven't visited that puzzle
+                if np.id() not in visited:
+                    #Create the new SearchNode
+                    new_node = SearchNode(cur_node.cost + 1, np, cur_node.path + m, options)
+
+                    #get the f-value for this puzzle
+                    f = new_node.f_value
+                    #if f value is below the limit we can add it to the fringe
+                    if f <= f_limit:
+                        #Add it to the FRINGE, along with its f-value (stored inside the node)
+                        fringe.put(new_node)
+
+    #We didn't find a solution
+    if not done:
+        print('NO SOLUTION FOUND!')
+        return None,None
+    return None #return path length
     
 def run_dfs(node, depth_limit, visited):
     """
@@ -504,7 +568,7 @@ if __name__ == '__main__':
             exp, pl = run_best_first_search(pq, options)
         elif options.search == 'ids': 
             #Use this line to run the iterative deepening-search
-            exp, pl = run_iterative_search(start_node)
+            exp, pl = run_iterative_search(pq)
         else:
             print("Search option not valid. Can be bfs or ids")
             sys.exit()
