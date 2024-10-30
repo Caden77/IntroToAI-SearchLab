@@ -285,16 +285,16 @@ def run_iterative_search(start_node):
     It caps the depth of the search at 40 (no 8-puzzles have solutions this long)
     """
     #Our initial depth limit
-    depth_limit = 1
+    f_limit = 1
     
     #Maximum depth limit
-    max_depth_limit = 40
+    max_f_limit = 40
     
     #Keep track of the total number of nodes we expand
     total_expanded = 0
     
     #Keep trying until our depth limit hits 40
-    while depth_limit < max_depth_limit:
+    while f_limit < max_f_limit:
         
         #Store visited nodes along the current search path
         visited = dict()
@@ -304,7 +304,7 @@ def run_iterative_search(start_node):
         visited[start_node.puzzle.id()] = True
         
         #Run depth-limited search starting at initial node (which points to initial state)
-        path_length = run_dfs(start_node, depth_limit, visited) 
+        path_length = run_dfs(start_node, f_limit, visited) 
     
         #See how many nodes we expanded on this iteration and add it to our total
         total_expanded += visited['N']
@@ -313,16 +313,16 @@ def run_iterative_search(start_node):
         if path_length is not None:
             #It was! Print out information and return the search stats
             print('Expanded ', total_expanded, 'nodes')
-            print('IDS Found solution at depth', depth_limit)
+            print('IDS Found solution at depth', f_limit)
             return total_expanded, path_length
             
         # No solution was found at this depth limit, so increment our depth-limit    
-        depth_limit += 1
+        f_limit += 1
         
     # No solution was found at any depth-limit, so return None,None (Which signifies no solution found)
     return None, None
     
-def run_dfs(node, depth_limit, visited):
+def run_dfs(node, f_limit, visited):
     """
     Recursive Depth-Limited Search:  
     
@@ -338,7 +338,8 @@ def run_dfs(node, depth_limit, visited):
         return len(node.path)
         
     # Check to see if the depth limit has been reached (number of actions that have been taken)
-    if len(node.path) >= depth_limit:
+    # for part 2 This is the only thing that has changed!!
+    if node.f_value >= f_limit:
         # It has. Return None, signifying that no path was found
         return None
     
@@ -364,7 +365,7 @@ def run_dfs(node, depth_limit, visited):
             visited[node.puzzle.id()] = True
             
             #Recurse on this new state
-            path_length = run_dfs(node, depth_limit, visited)    
+            path_length = run_dfs(node, f_limit, visited)    
             
             #Check to see if a solution was found down this path (return value of None means no)
             if path_length is not None:
