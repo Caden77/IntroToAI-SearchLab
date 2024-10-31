@@ -237,6 +237,9 @@ def tiles_out_of_row_column(puzzle):
     h = 0
     for tileInd in range(0, len(state)):
         tile = state[tileInd]
+        if tile == 0:
+            #dont count 0
+            continue
         if (get_tile_row(tile) != get_tile_row(tileInd)):
             h += 1
         if (get_tile_column(tile) != get_tile_column(tileInd)):
@@ -259,12 +262,44 @@ def manhattan_distance_to_goal(puzzle):
     manDist = 0
     for tileCur in range(0, len(state)):
         tileWant = state[tileCur]
+        if tileWant == 0:
+            #dont count 0
+            continue
         dist = abs(get_tile_column(tileWant) - get_tile_column(tileCur)) + abs(get_tile_row(tileWant) - get_tile_row(tileCur))
         manDist += dist
     
     return manDist #change this!
     
     ######## TASK 1.4.2 END   ##########  
+
+# def manhattan_with_linear_conflicts_to_goal(puzzle):
+#     manDist = manhattan_distance_to_goal(puzzle)
+
+#     state = puzzle.state
+#     #hState stores whether the node is in correct row col or both
+#     # none: 0
+#     # row only: 1
+#     # col only: 2
+#     # row and col: 3
+#     hState = [0]*len(state)
+#     manDist = 0
+#     for tilePos in range(0, len(state)):
+#         tileAtPos = state[tilePos]
+#         if tileAtPos == 0:
+#             continue
+#         if (get_tile_row(tilePos) == get_tile_row(tileAtPos)):
+#             #we are in the correct row
+
+#         #for tiles in row
+
+#         for 
+
+#         #for tiles in col
+#         tileWant = state[tileCur]
+#         dist = abs(get_tile_column(tileWant) - get_tile_column(tileCur)) + abs(get_tile_row(tileWant) - get_tile_row(tileCur))
+#         manDist += dist
+
+#     return manConfDist
 
     
 def get_tile_row(tile):
